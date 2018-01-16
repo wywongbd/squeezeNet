@@ -28,6 +28,8 @@ class SqueezeNet:
 	def build_model(self):
 		layers = {}
 
+		# this model architecture is based on the SqueezeNet v1.1, for more details please refer to DeepScale's SqueezeNet repository  
+
 		layers['input'] = self.imgs
 
 		layers['conv1'] = tf.nn.conv2d(layers['input'], self.get_weight([3, 3, 3, 64], 'conv1'), strides = [1, 2, 2, 1], padding= 'SAME')
@@ -73,6 +75,7 @@ class SqueezeNet:
 		self.accuracy = tf.reduce_mean(tf.cast(self.correct_prediction, tf.float32))
 		self.sess.run(tf.global_variables_initializer())
 
+		# batch optimization not yet implemented
 		for step in range(1, epoch):
 			batch_x, batch_y = X_train, Y_train
 			# Run optimization op (backprop)
