@@ -28,8 +28,6 @@ class SqueezeNet:
 	def build_model(self):
 		layers = {}
 
-		self.mean = tf.constant([123.0, 117.0, 104.0], dtype=tf.float32, shape=[1, 1, 1, 3], name='img_mean')
-		# images = self.imgs - self.mean
 		layers['input'] = self.imgs
 
 		layers['conv1'] = tf.nn.conv2d(layers['input'], self.get_weight([3, 3, 3, 64], 'conv1'), strides = [1, 2, 2, 1], padding= 'SAME')
@@ -86,10 +84,6 @@ class SqueezeNet:
 				print("Step " + str(step) + ", Minibatch Loss= " + "{:.4f}".format(loss) + ", Training Accuracy= " + "{:.3f}".format(acc))
 
 		print("Optimization Finished!")
-
-		# for step in range(10):
-		# 	return self.run_model(X_train, Y_train, epochs = epoch)
-			# self.sess.run(self.optimize, feed_dict={self.imgs: X_train, self.target: Y_train})
 
 
 	def get_weight(self, shape, name, initializer = 'truncated_normal'):
