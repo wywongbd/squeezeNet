@@ -10,12 +10,12 @@ class SqueezeNet:
 	Implementation of squeezeNet model demonstrated in the paper: https://arxiv.org/abs/1602.07360
 	
 	"""
-	def __init__(self, session, alpha, optimizer=tf.train.AdamOptimizer, squeeze_ratio = 0.125):
+	def __init__(self, session, optimizer, squeeze_ratio = 0.125):
 		self.sess = session
 		self.target = tf.placeholder(tf.float32, [None, 1000])
 		self.imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
 
-		self.alpha = alpha
+		# the squeezeNet described in the paper has a squeeze_ratio of 0.125
 		self.sq_ratio  = squeeze_ratio
 		self.optimizer = optimizer
 
@@ -65,8 +65,8 @@ class SqueezeNet:
 
 
 	def init_optimizer(self):
-		self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.target))
-		self.optimize = self.optimizer(self.alpha).minimize(self.loss)
+		self.loss = tf.losses.softmax_cross_entropy(onehot_labels=self.target, logits=self.logits)
+		self.optimize = (self.optimizer).minimize(self.loss)
 
 	def train_model(self, X_train, Y_train, epoch = 10):
 		self.correct_prediction = tf.equal(tf.argmax(self.probs, 1), tf.argmax(self.target, axis=1))
@@ -81,17 +81,13 @@ class SqueezeNet:
 			if step % 5 == 0 or step == 1:
 				# Calculate batch loss and accuracy
 				loss, acc = self.sess.run([self.loss, self.accuracy], feed_dict={self.imgs: batch_x, self.target: batch_y})
-				print("Step " + str(step) + ", Minibatch Loss= " + "{:.4f}".format(loss) + ", Training Accuracy= " + "{:.3f}".format(acc))
+				print("Epoch " + str(step) + ", Minibatch Loss= " + "{:.4f}".format(loss) + ", Training Accuracy= " + "{:.3f}".format(acc))
 
 		print("Optimization Finished!")
 
 
-	def get_weight(self, shape, name, initializer = 'truncated_normal'):
-		if initializer == 'truncated_normal':
-			weight = tf.Variable(tf.truncated_normal(shape), name = 'W_'+ name)
-		else:
-			weight = tf.Variable(tf.random_normal(shape), name = 'W_'+ name)
-
+	def get_weight(self, shape, name):
+		weight = tf.Variable(tf.truncated_normal(shape), name = 'W_'+ name)
 		self.weights['W_'+ name] = weight
 		return self.weights['W_'+ name]
 
